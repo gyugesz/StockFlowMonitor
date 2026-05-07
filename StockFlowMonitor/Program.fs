@@ -15,9 +15,6 @@ module Program =
     let products =
         Storage.products
 
-    let movements =
-        Storage.movements
-
     let layout title bodyContent =
         $"""
         <html>
@@ -125,7 +122,7 @@ module Program =
                 products
                 |> List.map (fun product ->
                     let currentStock =
-                        StockLogic.calculateCurrentStock product.Id movements
+                        StockLogic.calculateCurrentStock product.Id Storage.movements
 
                     let status =
                         if StockLogic.isLowStock product currentStock then
@@ -151,7 +148,7 @@ module Program =
                 products
                 |> List.filter (fun product ->
                     let currentStock =
-                        StockLogic.calculateCurrentStock product.Id movements
+                        StockLogic.calculateCurrentStock product.Id Storage.movements
 
                     StockLogic.isLowStock product currentStock
                 )
@@ -201,7 +198,7 @@ module Program =
                 )
                 |> String.concat ""
             let rows =
-                movements
+                Storage.movements
                 |> List.map (fun movement ->
                     let movementType =
                         match movement.MovementType with
@@ -276,6 +273,27 @@ module Program =
             context.Response.WriteAsync(html)
         )) |> ignore
 
+        app.MapPost("/issue-stock", Func<HttpContext, Task>(fun context ->
+
+            task {
+                let! form =
+                    context.Request.ReadFormAsync()
+
+                let productId =
+                    form["productId"].ToString()
+                    |> int
+
+                let quantity =
+                    form["quantity"].ToString().Replace(",", ".")
+                    |> fun value ->
+                        Decimal.Parse(value, CultureInfo.InvariantCulture)
+
+                Storage.addMovement productId quantity Outgoing
+
+                context.Response.Redirect("/movements")
+            }
+
+        )) |> ignore
         app.MapGet("/", Func<HttpContext, Task>(fun context ->
             context.Response.Redirect("/stock")
             Task.CompletedTask
