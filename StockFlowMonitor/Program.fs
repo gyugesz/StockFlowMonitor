@@ -295,22 +295,51 @@ module Program =
 
         app.MapGet("/products", Func<HttpContext, Task>(fun context ->
 
-                let rows =
-                    Storage.products
-                    |> List.map (fun product ->
-                        $"""
-                        <tr>
-                            <td>{product.Id}</td>
-                            <td>{product.Name}</td>
-                            <td>{product.MinimumStock}</td>
-                        </tr>
-                        """
+                let searchTerm =
+                    context.Request.Query["search"].ToString()
+
+                let filteredProducts =
+                     if String.IsNullOrWhiteSpace(searchTerm) then
+                            Storage.products
+                     else
+                            Storage.products
+                            |> List.filter (fun product ->
+                            product.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                     )
-                    |> String.concat ""
+                let rows =
+                            filteredProducts
+                            |> List.map (fun product ->
+                                $"""
+                                <tr>
+                                    <td>{product.Id}</td>
+                                    <td>{product.Name}</td>
+                                    <td>{product.MinimumStock}</td>
+                                </tr>
+                                """
+                            )
+                            |> String.concat ""
 
                 let body =
                     $"""
                     <h1>Products</h1>
+
+                                     <form method="get" action="/products">
+
+                        <label>Search:</label>
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{searchTerm}"
+                            placeholder="Search product..." />
+
+                        <button type="submit">
+                            Search
+                        </button>
+
+                        <a href="/products" style="margin-left:10px;">Clear</a>
+
+                    </form>
 
                     <form method="post" action="/products">
 
@@ -335,7 +364,15 @@ module Program =
 
                     </form>
 
-                    <table>
+                       <table>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Minimum Stock</th>
+                        </tr>
+
+                        {rows}
+                    </table>
                         """
                 let html =
                     HtmlTemplates.layout "Products" body
