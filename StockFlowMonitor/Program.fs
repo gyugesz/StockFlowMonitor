@@ -229,8 +229,31 @@ module Program =
             let body =
                 $"""
                 <h1>Stock Movements</h1>
-                <h2>Issue Stock</h2>
+                 <h2>Receive Stock</h2>
 
+            <form method="post" action="/receive-stock" style="margin-bottom: 30px;">
+
+                <label>Product:</label>
+
+                <select name="productId">
+                    {productOptions}
+                </select>
+
+                <label style="margin-left:20px;">Quantity:</label>
+
+                <input
+                    type="number"
+                    name="quantity"
+                    step="0.01"
+                    min="0.01"
+                    required />
+
+                <button type="submit">
+                    Receive
+                </button>
+
+            </form>
+             <h2>Issue Stock</h2>
                 <form method="post" action="/issue-stock" style="margin-bottom: 30px;">
 
                     <label>Product:</label>
@@ -289,6 +312,27 @@ module Program =
                         Decimal.Parse(value, CultureInfo.InvariantCulture)
 
                 Storage.addMovement productId quantity Outgoing
+
+                context.Response.Redirect("/movements")
+            }
+
+        )) |> ignore
+        app.MapPost("/receive-stock", Func<HttpContext, Task>(fun context ->
+
+            task {
+                let! form =
+                    context.Request.ReadFormAsync()
+
+                let productId =
+                    form["productId"].ToString()
+                    |> int
+
+                let quantity =
+                    form["quantity"].ToString().Replace(",", ".")
+                    |> fun value ->
+                        Decimal.Parse(value, CultureInfo.InvariantCulture)
+
+                Storage.addMovement productId quantity Incoming
 
                 context.Response.Redirect("/movements")
             }
