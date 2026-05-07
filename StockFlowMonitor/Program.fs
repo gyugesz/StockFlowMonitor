@@ -12,9 +12,6 @@ open Microsoft.Extensions.Hosting
 module Program =
     let exitCode = 0
 
-    let products =
-        Storage.products
-
     let layout title bodyContent =
         $"""
         <html>
@@ -119,7 +116,7 @@ module Program =
         app.MapGet("/stock", Func<HttpContext, Task>(fun context ->
 
             let rows =
-                products
+                Storage.products
                 |> List.map (fun product ->
                     let currentStock =
                         StockLogic.calculateCurrentStock product.Id Storage.movements
@@ -142,10 +139,10 @@ module Program =
                 |> String.concat ""
 
             let totalProducts =
-                products.Length
+                Storage.products.Length
 
             let lowStockCount =
-                products
+                Storage.products
                 |> List.filter (fun product ->
                     let currentStock =
                         StockLogic.calculateCurrentStock product.Id Storage.movements
@@ -192,7 +189,7 @@ module Program =
         app.MapGet("/movements", Func<HttpContext, Task>(fun context ->
             
             let productOptions =
-                products
+                Storage.products
                 |> List.map (fun product ->
                     $"<option value='{product.Id}'>{product.Name}</option>"
                 )
@@ -213,7 +210,7 @@ module Program =
                         <td>{movement.Id}</td>
                         <td>
                             {
-                                products
+                                Storage.products
                                 |> List.find (fun p -> p.Id = movement.ProductId)
                                 |> fun p -> p.Name
                             }
@@ -296,6 +293,57 @@ module Program =
             context.Response.WriteAsync(html)
         )) |> ignore
 
+        app.MapGet("/products", Func<HttpContext, Task>(fun context ->
+
+                let rows =
+                    Storage.products
+                    |> List.map (fun product ->
+                        $"""
+                        <tr>
+                            <td>{product.Id}</td>
+                            <td>{product.Name}</td>
+                            <td>{product.MinimumStock}</td>
+                        </tr>
+                        """
+                    )
+                    |> String.concat ""
+
+                let body =
+                    $"""
+                    <h1>Products</h1>
+
+                    <form method="post" action="/products">
+
+                        <label>Product Name:</label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            required />
+
+                        <label style="margin-left:20px;">Minimum Stock:</label>
+
+                        <input
+                            type="number"
+                            name="minimumStock"
+                            min="0"
+                            required />
+
+                        <button type="submit">
+                            Add Product
+                        </button>
+
+                    </form>
+
+                    <table>
+                        """
+                let html =
+                    HtmlTemplates.layout "Products" body
+
+                context.Response.ContentType <- "text/html"
+                context.Response.WriteAsync(html)
+
+                 )) |> ignore
         app.MapPost("/issue-stock", Func<HttpContext, Task>(fun context ->
 
             task {
@@ -306,14 +354,22 @@ module Program =
                     form["productId"].ToString()
                     |> int
 
-                let quantity =
+                let quantity : decimal  =
                     form["quantity"].ToString().Replace(",", ".")
                     |> fun value ->
                         Decimal.Parse(value, CultureInfo.InvariantCulture)
 
-                Storage.addMovement productId quantity Outgoing
+                if StockLogic.canIssueStock productId quantity Storage.movements then
+                        Storage.addMovement productId quantity Incoming
+                        context.Response.Redirect("/movements")
+                else    
+                        context.Response.ContentType <- "text/html"
 
-                context.Response.Redirect("/movements")
+                let html =
+                    HtmlTemplates.layout
+                        "Error"
+                        "<h1 style='color:red;'>Not enough stock for this issue.</h1><a href='/movements'>Back</a>"
+                do! context.Response.WriteAsync(html)
             }
 
         )) |> ignore
@@ -332,9 +388,32 @@ module Program =
                     |> fun value ->
                         Decimal.Parse(value, CultureInfo.InvariantCulture)
 
-                Storage.addMovement productId quantity Incoming
+                Storage.addMovement productId quantity Outgoing
 
                 context.Response.Redirect("/movements")
+
+                 
+            }
+
+        )) |> ignore
+        app.MapPost("/products", Func<HttpContext, Task>(fun context ->
+
+            task {
+
+                let! form =
+                    context.Request.ReadFormAsync()
+
+                let name =
+                    form["name"].ToString()
+
+                let minimumStock =
+                    form["minimumStock"].ToString()
+                    |> int
+
+                Storage.addProduct name minimumStock
+
+                context.Response.Redirect("/products")
+
             }
 
         )) |> ignore

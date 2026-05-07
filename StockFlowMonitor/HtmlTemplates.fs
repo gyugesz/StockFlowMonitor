@@ -2,92 +2,116 @@
 
 module HtmlTemplates =
 
+    let css =
+        """
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f6f8;
+            color: #222;
+        }
+
+        nav {
+            background-color: #1f2937;
+            padding: 18px 40px;
+            margin-bottom: 35px;
+        }
+
+        nav a {
+            margin-right: 24px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        h1 {
+            margin-left: 40px;
+            font-size: 32px;
+        }
+
+        h2 {
+            margin-left: 40px;
+            margin-top: 28px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            margin: 20px 40px 30px 40px;
+        }
+
+        .card, form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .card {
+            width: 220px;
+        }
+
+        form {
+            margin: 10px 40px 25px 40px;
+            width: fit-content;
+        }
+
+        input, select {
+            padding: 8px;
+            margin-right: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            background-color: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: calc(100% - 80px);
+            margin: 25px 40px;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        th, td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 14px 18px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f9fafb;
+            color: #374151;
+        }
+        """
+
     let layout title body =
         $"""
         <html>
         <head>
-
             <title>{title}</title>
-
             <style>
-
-                body {{
-                    font-family: Arial;
-                    margin: 40px;
-                }}
-
-                nav {{
-                    margin-bottom: 30px;
-                }}
-
-                nav a {{
-                    margin-right: 20px;
-                    text-decoration: none;
-                    font-weight: bold;
-                    color: #0066cc;
-                }}
-
-                table {{
-                    border-collapse: collapse;
-                    width: 1000px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                }}
-
-                th, td {{
-                    border: 1px solid #dcdcdc;
-                    padding: 14px;
-                    text-align: left;
-                }}
-
-                th {{
-                    background-color: #f5f5f5;
-                }}
-
-                tr:nth-child(even) {{
-                    background-color: #fafafa;
-                }}
-
-                tr:hover {{
-                    background-color: #f0f7ff;
-                }}
-
-                .cards {{
-                    display: flex;
-                    gap: 20px;
-                    margin-bottom: 24px;
-                }}
-
-                .card {{
-                    padding: 20px;
-                    width: 200px;
-                    border: 1px solid #dcdcdc;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                }}
-
-                .card h3 {{
-                    margin: 0 0 10px 0;
-                    font-size: 16px;
-                }}
-
-                .card p {{
-                    margin: 0;
-                    font-size: 28px;
-                    font-weight: bold;
-                }}
-
+                {css}
             </style>
-
         </head>
 
         <body>
-
             <nav>
                 <a href="/stock">Dashboard</a>
                 <a href="/movements">Movements</a>
+                <a href="/products">Products</a>
             </nav>
 
             {body}
-
         </body>
         </html>
         """

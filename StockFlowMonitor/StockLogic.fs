@@ -12,3 +12,9 @@ module StockLogic =
 
     let isLowStock product currentStock =
         currentStock < product.MinimumStock
+
+    let canIssueStock productId quantity movements =
+        let currentStock =
+            calculateCurrentStock productId movements
+
+        quantity <= currentStock

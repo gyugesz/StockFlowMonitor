@@ -4,7 +4,7 @@ open System
 
 module Storage =
 
-    let products =
+    let mutable products =
         [
             {
                 Id = 1
@@ -77,3 +77,18 @@ module Storage =
                 }
 
             movements <- movements @ [ newMovement ]
+    let addProduct name minimumStock =
+        let nextId =
+            products
+            |> List.map (fun p -> p.Id)
+            |> List.max
+            |> fun id -> id + 1
+
+        let newProduct : Product =
+            {
+                Id = nextId
+                Name = name
+                MinimumStock = minimumStock
+            }
+
+        products <- products @ [ newProduct ]
