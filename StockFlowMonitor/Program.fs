@@ -1,7 +1,7 @@
 namespace StockFlowMonitor
 
 #nowarn "20"
-
+open System.Globalization
 open System
 open System.Threading.Tasks
 open Microsoft.AspNetCore.Builder
@@ -193,7 +193,13 @@ module Program =
         )) |> ignore
 
         app.MapGet("/movements", Func<HttpContext, Task>(fun context ->
-
+            
+            let productOptions =
+                products
+                |> List.map (fun product ->
+                    $"<option value='{product.Id}'>{product.Name}</option>"
+                )
+                |> String.concat ""
             let rows =
                 movements
                 |> List.map (fun movement ->
@@ -226,7 +232,30 @@ module Program =
             let body =
                 $"""
                 <h1>Stock Movements</h1>
+                <h2>Issue Stock</h2>
 
+                <form method="post" action="/issue-stock" style="margin-bottom: 30px;">
+
+                    <label>Product:</label>
+
+                    <select name="productId">
+                        {productOptions}
+                    </select>
+
+                    <label style="margin-left:20px;">Quantity:</label>
+
+                    <input
+                        type="number"
+                        name="quantity"
+                        step="0.01"
+                        min="0.01"
+                        required />
+
+                    <button type="submit">
+                        Issue
+                    </button>
+
+                </form>
                 <table>
                     <tr>
                         <th>Id</th>

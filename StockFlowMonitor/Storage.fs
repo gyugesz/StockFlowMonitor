@@ -25,7 +25,7 @@ module Storage =
             }
         ]
 
-    let movements =
+    let mutable movements =
         [
             {
                 Id = 1
@@ -59,3 +59,21 @@ module Storage =
                 Date = DateTime.Now
             }
         ]
+
+    let addMovement productId quantity movementType =
+            let nextId =
+                movements
+                |> List.map (fun m -> m.Id)
+                |> List.max
+                |> fun id -> id + 1
+
+            let newMovement : StockMovement   =
+                {
+                    Id = nextId
+                    ProductId = productId
+                    Quantity = quantity
+                    MovementType = movementType
+                    Date = DateTime.Now
+                }
+
+            movements <- movements @ [ newMovement ]
