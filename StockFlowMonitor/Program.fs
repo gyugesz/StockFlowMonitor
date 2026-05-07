@@ -186,7 +186,7 @@ module Program =
                 """
 
             let html =
-                layout "StockFlow Monitor" body
+                HtmlTemplates.layout "StockFlow Monitor" body
 
             context.Response.ContentType <- "text/html"
             context.Response.WriteAsync(html)
