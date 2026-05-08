@@ -92,6 +92,41 @@ module HtmlTemplates =
             background-color: #f9fafb;
             color: #374151;
         }
+        .alert-box {
+            background-color: white;
+            color: #991b1b;
+            margin: 20px 40px 30px 40px;
+            padding: 20px;
+            border-left: 6px solid #dc2626;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            max-width: 520px;
+        }
+
+        .alert-box h2 {
+            margin: 0 0 12px 0;
+            font-size: 22px;
+        }
+
+        .alert-box ul {
+            margin: 0;
+            padding-left: 22px;
+        }
+
+        .alert-box li {
+            margin-bottom: 6px;
+        }
+
+        .success-box {
+            background-color: white;
+            color: #166534;
+            margin: 20px 40px 30px 40px;
+            padding: 20px;
+            border-left: 6px solid #16a34a;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            max-width: 520px;
+        }
         """
 
     let layout title body =

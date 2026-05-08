@@ -151,6 +151,32 @@ module Program =
                 )
                 |> List.length
 
+            let lowStockRows =
+                Storage.products
+                |> List.choose (fun product ->
+                    let currentStock =
+                        StockLogic.calculateCurrentStock product.Id Storage.movements
+
+                    if StockLogic.isLowStock product currentStock then
+                        Some $"<li><strong>{product.Name}</strong>: {currentStock} / minimum {product.MinimumStock}</li>"
+                    else
+                        None
+                )
+                |> String.concat ""
+
+            let lowStockAlert =
+                if String.IsNullOrWhiteSpace(lowStockRows) then
+                    "<div class='success-box'>All products have enough stock.</div>"
+                else
+                    $"""
+                    <div class='alert-box'>
+                        <h2>Low Stock Alert</h2>
+                        <ul>
+                            {lowStockRows}
+                        </ul>
+                    </div>
+                    """
+
             let body =
                 $"""
                 <h1>StockFlow Monitor</h1>
@@ -166,6 +192,8 @@ module Program =
                         <p>{lowStockCount}</p>
                     </div>
                 </div>
+
+                  {lowStockAlert}
 
                 <table>
                     <tr>
