@@ -1,5 +1,4 @@
 # StockFlowMonitor
-# StockFlowMonitor
 
 StockFlowMonitor is a simple inventory management web application built with F# and ASP.NET Core Minimal API.
 
@@ -22,7 +21,8 @@ The purpose of the project is to demonstrate basic stock management operations, 
 ## Dashboard
 - Display current stock values
 - Low stock detection
-- Product statistics
+- Low stock alert section
+- Product statistics cards
 
 ## Stock Movements
 - Track incoming and outgoing movements
@@ -34,8 +34,7 @@ The purpose of the project is to demonstrate basic stock management operations, 
 
 - F#
 - ASP.NET Core Minimal API
-- HTML
-- CSS
+- HTML & CSS
 - Git & GitHub
 
 ---
