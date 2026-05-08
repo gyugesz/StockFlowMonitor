@@ -197,6 +197,8 @@ module Program =
             let rows =
                 Storage.movements
                 |> List.map (fun movement ->
+                    let currentStock =
+                        StockLogic.calculateCurrentStock movement.ProductId Storage.movements
                     let movementType =
                         match movement.MovementType with
                         | Incoming ->
@@ -217,6 +219,7 @@ module Program =
                         </td>
                         <td>{movement.Quantity}</td>
                         <td>{movementType}</td>
+                        <td>{currentStock}</td>
                         <td>{movement.Date}</td>
                     </tr>
                     """
@@ -276,9 +279,10 @@ module Program =
                 <table>
                     <tr>
                         <th>Id</th>
-                        <th>Product Id</th>
+                        <th>Product</th>
                         <th>Quantity</th>
                         <th>Movement Type</th>
+                        <th>Current Stock</th>
                         <th>Date</th>
                     </tr>
 
@@ -307,17 +311,29 @@ module Program =
                             product.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                     )
                 let rows =
-                            filteredProducts
-                            |> List.map (fun product ->
-                                $"""
-                                <tr>
-                                    <td>{product.Id}</td>
-                                    <td>{product.Name}</td>
-                                    <td>{product.MinimumStock}</td>
-                                </tr>
-                                """
-                            )
-                            |> String.concat ""
+                        filteredProducts
+                        |> List.map (fun product ->
+
+                            let currentStock =
+                                StockLogic.calculateCurrentStock product.Id Storage.movements
+
+                            let status =
+                                if StockLogic.isLowStock product currentStock then
+                                    "<span style='color:red;font-weight:bold;'>LOW STOCK</span>"
+                                else
+                                    "<span style='color:green;font-weight:bold;'>OK</span>"
+
+                            $"""
+                            <tr>
+                                <td>{product.Id}</td>
+                                <td>{product.Name}</td>
+                                <td>{currentStock}</td>
+                                <td>{product.MinimumStock}</td>
+                                <td>{status}</td>
+                            </tr>
+                            """
+                        )
+                        |> String.concat ""
 
                 let body =
                     $"""
@@ -365,10 +381,12 @@ module Program =
                     </form>
 
                        <table>
-                        <tr>
+                       <tr>
                             <th>Id</th>
                             <th>Name</th>
+                            <th>Current Stock</th>
                             <th>Minimum Stock</th>
+                            <th>Status</th>
                         </tr>
 
                         {rows}
@@ -397,7 +415,7 @@ module Program =
                         Decimal.Parse(value, CultureInfo.InvariantCulture)
 
                 if StockLogic.canIssueStock productId quantity Storage.movements then
-                        Storage.addMovement productId quantity Incoming
+                        Storage.addMovement productId quantity Outgoing
                         context.Response.Redirect("/movements")
                 else    
                         context.Response.ContentType <- "text/html"
@@ -425,7 +443,7 @@ module Program =
                     |> fun value ->
                         Decimal.Parse(value, CultureInfo.InvariantCulture)
 
-                Storage.addMovement productId quantity Outgoing
+                Storage.addMovement productId quantity Incoming
 
                 context.Response.Redirect("/movements")
 
