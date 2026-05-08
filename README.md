@@ -101,7 +101,19 @@ https://localhost:7053
 - REST API improvements
 
 ---
+# Screenshots
 
+## Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+## Products
+
+![Products](screenshots/products.png)
+
+## Movements
+
+![Movements](screenshots/movements.png)
 # Author
 
 Developed as a university F# project.
